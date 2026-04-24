@@ -198,6 +198,25 @@ swagger:
 | `auth.client_secret` | string | OAuth2 client secret |
 | `auth.scopes` | array | OAuth2 scopes |
 
+## Insomnia
+
+Import requests from Insomnia Collections:
+
+```yaml
+insomnia:
+  file: ./insomnia-export.json
+  auth:
+    type: bearer
+    token: your-token
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | string | Path to Insomnia JSON export |
+| `data` | object | Inline Insomnia data |
+| `auth` | object | Auth configuration (same as Swagger) |
+| `token` | string | Static token |
+
 ## Examples
 
 ### Complete REST Example

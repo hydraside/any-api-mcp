@@ -1,6 +1,7 @@
 import yaml
 import httpx
 import re
+import json
 from typing import Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
@@ -167,10 +168,70 @@ def parse_swagger_operations(spec: dict, base_url: str, auth: AuthConfig) -> lis
     return tools
 
 
+def parse_insomnia_requests(data: dict, base_headers: dict = None) -> list[ToolDefinition]:
+    tools = []
+    base_headers = base_headers or {}
+    
+    resources = data.get("_resources", [])
+    
+    def flatten_items(items, parent_name=""):
+        result = []
+        for item in items:
+            name = f"{parent_name}_{item['name']}" if parent_name else item['name']
+            result.append((name, item))
+            if item.get("items"):
+                result.extend(flatten_items(item["items"], name))
+        return result
+    
+    for resource in resources:
+        if resource.get("_type") == "workspace":
+            for item in resource.get("items", []):
+                for name, req in flatten_items([item]):
+                    if req.get("_type") != "request":
+                        continue
+                    
+                    request = req.get("request", {})
+                    method = request.get("method", "GET").upper()
+                    url = request.get("url", "")
+                    body = request.get("body", {})
+                    
+                    headers = dict(base_headers)
+                    req_headers = request.get("headers", [])
+                    for h in req_headers:
+                        headers[h.get("name", "")] = h.get("value", "")
+                    
+                    body_data = None
+                    if body.get("text"):
+                        try:
+                            body_data = json.loads(body["text"])
+                        except:
+                            body_data = {"raw": body["text"]}
+                    
+                    tool_name = re.sub(r"[^a-z0-9_]", "_", name.lower())
+                    
+                    properties = {}
+                    if body_data and isinstance(body_data, dict):
+                        for key in body_data:
+                            properties[key] = {"type": "string"}
+                    
+                    tools.append(ToolDefinition(
+                        name=tool_name,
+                        description=f"Insomnia request: {name}",
+                        input_schema={"type": "object", "properties": properties},
+                        handler_type=HandlerType.REST,
+                        url=url,
+                        method=method,
+                        headers=headers,
+                        body=body_data
+                    ))
+    
+    return tools
+
+
 def parse_tools(config: dict) -> list[ToolDefinition]:
     tools = []
-    swagger = config.get("swagger")
     
+    swagger = config.get("swagger")
     if swagger:
         spec_url = swagger.get("url", "")
         if spec_url:
@@ -183,6 +244,26 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
                     return swagger_tools
             except Exception as e:
                 print(f"Warning: Could not load Swagger: {e}")
+    
+    insomnia = config.get("insomnia")
+    if insomnia:
+        import json
+        try:
+            if insomnia.get("file"):
+                with open(insomnia["file"], "r") as f:
+                    data = json.load(f)
+            else:
+                data = insomnia.get("data", {})
+            
+            headers = {}
+            auth = AuthConfig.from_dict(insomnia.get("auth", {}))
+            headers.update(auth.get_headers(insomnia.get("token")))
+            
+            insomnia_tools = parse_insomnia_requests(data, headers)
+            if insomnia_tools:
+                return insomnia_tools
+        except Exception as e:
+            print(f"Warning: Could not load Insomnia: {e}")
     
     for tool in config.get("tools", []):
         handler = tool.get("handler", {})
