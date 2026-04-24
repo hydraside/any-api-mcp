@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-from any_api_mcp.loader import load_config, parse_tools, create_rest_tool
+from any_api_mcp.loader import load_config, parse_tools, create_tool
 import os
 
 
@@ -12,7 +12,7 @@ def create_server(config_path: str = "config.yaml") -> FastMCP:
     tools = parse_tools(config)
     
     for tool_def in tools:
-        tool_func = create_rest_tool(tool_def)
+        tool_func = create_tool(tool_def)
         
         @mcp.tool(name=tool_def.name, description=tool_def.description)
         async def execute_tool(tool_func=tool_func, **kwargs):

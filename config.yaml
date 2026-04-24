@@ -3,7 +3,7 @@ version: "1.0"
 
 tools:
   - name: get_time
-    description: Returns current server time
+    description: Returns current server time via REST
     input_schema:
       type: object
       properties: {}
@@ -12,7 +12,7 @@ tools:
       method: GET
 
   - name: echo
-    description: Echoes back the input message
+    description: Echoes back the input message via REST with body
     input_schema:
       type: object
       properties:
@@ -26,10 +26,48 @@ tools:
       method: POST
 
   - name: get_ip
-    description: Get public IP address
+    description: Get public IP address via REST
     input_schema:
       type: object
       properties: {}
     handler:
       url: https://api.ipify.org?format=json
       method: GET
+
+  - name: search_characters
+    description: Search Rick and Morty characters via GraphQL
+    input_schema:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Character name to search
+    handler:
+      type: graphql
+      url: https://rickandmortyapi.com/graphql
+      query: |
+        query ($name: String!) {
+          characters(filter: { name: $name }) {
+            results {
+              name
+              status
+              species
+            }
+          }
+        }
+      variables: {}
+
+  - name: get_user
+    description: Get user via JSONRPC
+    input_schema:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: User ID
+      required:
+        - user_id
+    handler:
+      type: jsonrpc
+      url: https://jsonplaceholder.typicode.com/posts
+      method: getUser
