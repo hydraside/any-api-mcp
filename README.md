@@ -214,6 +214,19 @@ uv run ruff check .
 uv run ruff format .
 ```
 
+## Web UI
+
+For a visual YAML configuration editor, see the separate repository:
+
+**👉 [any-api-mcp-web](https://github.com/hydraside/any-api-mcp-web)**
+
+```bash
+git clone https://github.com/hydraside/any-api-mcp-web.git
+cd any-api-mcp-web
+npm install
+npm run dev
+```
+
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
