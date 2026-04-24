@@ -8,6 +8,10 @@ Complete reference for `any-api-mcp` YAML configuration format.
 server_name: My Server      # Server name (optional)
 version: "1.0"           # API version (optional)
 
+swagger:                  # OR generate from Swagger/OpenAPI
+  url: https://api.example.com/swagger.json
+  ...
+
 tools:                    # List of tools (required)
   - name: ...            # Tool definition
     ...
@@ -19,6 +23,7 @@ tools:                    # List of tools (required)
 |-------|------|----------|-------------|
 | `server_name` | string | No | Name displayed in MCP client |
 | `version` | string | No | API version string |
+| `swagger` | object | No | Generate tools from Swagger spec |
 | `tools` | array | Yes | List of tool definitions |
 
 ## Tool Definition
@@ -125,6 +130,73 @@ handler:
 | `url` | string | Yes | JSONRPC endpoint URL |
 | `headers` | object | No | HTTP headers |
 | `method` | string | Yes | Method name |
+
+## Swagger/OpenAPI
+
+Generate tools automatically from an OpenAPI/Swagger specification:
+
+```yaml
+swagger:
+  url: https://api.example.com/swagger.json
+  base_url: https://api.example.com
+  auth:
+    type: bearer
+    token: your-token
+```
+
+### Auth Types
+
+| Type | Description |
+|------|-------------|
+| `none` | No authentication |
+| `api_key` | API key in header |
+| `bearer` | Bearer token (default) |
+| `basic` | Basic auth |
+| `oauth2` | OAuth2 client credentials |
+
+### Auth Configuration
+
+```yaml
+# API Key
+swagger:
+  url: https://api.example.com/swagger.json
+  auth:
+    type: api_key
+    header: X-API-Key
+    token: your-key
+
+# Bearer Token
+swagger:
+  url: https://api.example.com/swagger.json
+  auth:
+    type: bearer
+    token: your-token
+
+# OAuth2 Client Credentials
+swagger:
+  url: https://api.example.com/swagger.json
+  auth:
+    type: oauth2
+    token_url: https://oauth.example.com/token
+    client_id: your-client-id
+    client_secret: your-client-secret
+    scopes: [read, write]
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `url` | string | Swagger/OpenAPI spec URL |
+| `base_url` | string | Base URL for API (optional) |
+| `auth.type` | string | Auth type: none, api_key, bearer, basic, oauth2 |
+| `auth.header` | string | Header name (default: Authorization) |
+| `auth.prefix` | string | Token prefix (default: Bearer) |
+| `auth.token` | string | Static token |
+| `auth.username` | string | Username for basic auth |
+| `auth.password` | string | Password for basic auth |
+| `auth.token_url` | string | OAuth2 token endpoint |
+| `auth.client_id` | string | OAuth2 client ID |
+| `auth.client_secret` | string | OAuth2 client secret |
+| `auth.scopes` | array | OAuth2 scopes |
 
 ## Examples
 

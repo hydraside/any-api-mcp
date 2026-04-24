@@ -1,6 +1,21 @@
 server_name: demo-server
 version: "1.0"
 
+swagger:
+  url: https://petstore.swagger.io/v2/swagger.json
+  base_url: https://petstore.swagger.io/v2
+  auth:
+    type: api_key
+    header: api_key
+    token: your-api-key-here
+  # Or OAuth2:
+  # auth:
+  #   type: oauth2
+  #   token_url: https://oauth.example.com/token
+  #   client_id: your-client-id
+  #   client_secret: your-client-secret
+  #   scopes: [read:pets, write:pets]
+
 tools:
   - name: get_time
     description: Returns current server time via REST

@@ -1,7 +1,8 @@
 import yaml
 import httpx
+import re
 from typing import Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
@@ -9,6 +10,72 @@ class HandlerType(Enum):
     REST = "rest"
     GRAPHQL = "graphql"
     JSONRPC = "jsonrpc"
+    SWAGGER = "swagger"
+
+
+@dataclass
+class AuthConfig:
+    type: str = "none"  # none, api_key, bearer, basic, oauth2
+    header: str = "Authorization"
+    prefix: str = "Bearer"
+    username: Optional[str] = None
+    password: Optional[str] = None
+    token_url: Optional[str] = None
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    scopes: list = field(default_factory=list)
+    _token: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AuthConfig":
+        auth = cls(type=data.get("type", "none"))
+        auth.header = data.get("header", "Authorization")
+        auth.prefix = data.get("prefix", "Bearer")
+        auth.username = data.get("username")
+        auth.password = data.get("password")
+        auth.token_url = data.get("token_url")
+        auth.client_id = data.get("client_id")
+        auth.client_secret = data.get("client_secret")
+        auth.scopes = data.get("scopes", [])
+        return auth
+
+    async def get_token(self) -> Optional[str]:
+        if self._token:
+            return self._token
+        
+        if self.type == "oauth2" and self.token_url:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    self.token_url,
+                    data={
+                        "grant_type": "client_credentials",
+                        "client_id": self.client_id,
+                        "client_secret": self.client_secret,
+                        "scope": " ".join(self.scopes)
+                    }
+                )
+                if resp.status_code == 200:
+                    self._token = resp.json().get("access_token")
+        return self._token
+
+    def get_headers(self, static_token: Optional[str] = None) -> dict:
+        headers = {}
+        
+        if self.type == "none":
+            pass
+        elif self.type == "api_key":
+            headers[self.header] = static_token or ""
+        elif self.type == "bearer":
+            token = static_token or self._token or ""
+            headers[self.header] = f"{self.prefix} {token}"
+        elif self.type == "basic" and self.username:
+            import base64
+            creds = f"{self.username}:{self.password or ''}"
+            headers[self.header] = f"Basic {base64.b64encode(creds.encode()).decode()}"
+        elif self.type == "oauth2" and self._token:
+            headers[self.header] = f"Bearer {self._token}"
+        
+        return headers
 
 
 @dataclass
@@ -24,6 +91,7 @@ class ToolDefinition:
     graphql_query: Optional[str] = None
     graphql_variables: Optional[dict] = None
     jsonrpc_method: Optional[str] = None
+    operation_id: Optional[str] = None
 
 
 def load_config(path: str) -> dict:
@@ -31,8 +99,91 @@ def load_config(path: str) -> dict:
         return yaml.safe_load(f)
 
 
+def load_swagger(url: str, headers: dict = None) -> dict:
+    response = httpx.get(url, headers=headers or {})
+    return response.json()
+
+
+def parse_swagger_operations(spec: dict, base_url: str, auth: AuthConfig) -> list[ToolDefinition]:
+    tools = []
+    servers = spec.get("servers", [])
+    if servers and servers[0].get("url"):
+        base_url = servers[0]["url"]
+    
+    paths = spec.get("paths", {})
+    for path, methods in paths.items():
+        for method, operation in methods.items():
+            if method.upper() not in ("GET", "POST", "PUT", "PATCH", "DELETE"):
+                continue
+            
+            op_id = operation.get("operationId") or operation.get("summary", path)
+            name = re.sub(r"[^a-z0-9_]", "_", op_id.lower())
+            
+            properties = {}
+            required_params = []
+            
+            params = operation.get("parameters", [])
+            for param in params:
+                p_name = param.get("name")
+                p_required = param.get("required", False)
+                p_schema = param.get("schema", {})
+                p_type = p_schema.get("type", "string")
+                
+                properties[p_name] = {
+                    "type": p_type,
+                    "description": param.get("description", "")
+                }
+                if p_required:
+                    required_params.append(p_name)
+            
+            request_body = operation.get("requestBody")
+            if request_body:
+                content = request_body.get("content", {})
+                if "application/json" in content:
+                    schema = content["application/json"].get("schema", {})
+                    for prop, prop_data in schema.get("properties", {}).items():
+                        properties[prop] = {
+                            "type": prop_data.get("type", "string"),
+                            "description": prop_data.get("description", "")
+                        }
+                    if schema.get("required"):
+                        required_params.extend(schema["required"])
+            
+            tools.append(ToolDefinition(
+                name=name,
+                description=operation.get("description", operation.get("summary", "")),
+                input_schema={
+                    "type": "object",
+                    "properties": properties,
+                    "required": required_params
+                },
+                handler_type=HandlerType.REST,
+                url=f"{base_url}{path}",
+                method=method.upper(),
+                headers={},
+                operation_id=op_id
+            ))
+    
+    return tools
+
+
 def parse_tools(config: dict) -> list[ToolDefinition]:
     tools = []
+    swagger = config.get("swagger")
+    
+    if swagger:
+        spec_url = swagger.get("url", "")
+        if spec_url:
+            auth = AuthConfig.from_dict(swagger.get("auth", {}))
+            try:
+                spec = load_swagger(spec_url, auth.get_headers(swagger.get("token")))
+                base_url = swagger.get("base_url", "")
+                swagger_tools = parse_swagger_operations(spec, base_url, auth)
+                if swagger_tools:
+                    return swagger_tools
+            except Exception as e:
+                print(f"Warning: Could not load Swagger: {e}")
+    
     for tool in config.get("tools", []):
         handler = tool.get("handler", {})
         handler_type = handler.get("type", "rest").lower()
