@@ -69,9 +69,15 @@ handler:
   type: rest           # Optional, "rest" is default
   url: https://api.example.com/endpoint
   method: GET         # GET, POST, PUT, PATCH, DELETE
-  headers:           # Optional HTTP headers
+  headers:           # HTTP headers (object or array)
     Authorization: "Bearer TOKEN"
     Content-Type: "application/json"
+  # OR as array:
+  # headers:
+  #   - name: Authorization
+  #     value: "Bearer TOKEN"
+  #   - name: X-Custom-Header
+  #     value: "value"
   body:              # Optional fixed body
     key: value
 ```
@@ -81,7 +87,7 @@ handler:
 | `type` | string | No | Handler type: `rest`, `graphql`, `jsonrpc` |
 | `url` | string | Yes | REST endpoint URL |
 | `method` | string | No | HTTP method (default: GET) |
-| `headers` | object | No | HTTP headers |
+| `headers` | object/array | No | HTTP headers |
 | `body` | object | No | Fixed request body |
 
 ### GraphQL Handler

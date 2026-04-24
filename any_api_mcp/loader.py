@@ -270,6 +270,7 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
         handler_type = handler.get("type", "rest").lower()
         
         if handler_type == "graphql":
+            graphql_headers = parse_headers(handler.get("headers", {}))
             tools.append(ToolDefinition(
                 name=tool["name"],
                 description=tool.get("description", ""),
@@ -277,11 +278,12 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
                 handler_type=HandlerType.GRAPHQL,
                 url=handler.get("url", ""),
                 method="POST",
-                headers=handler.get("headers", {}),
+                headers=graphql_headers,
                 graphql_query=handler.get("query", ""),
                 graphql_variables=handler.get("variables", {})
             ))
         elif handler_type == "jsonrpc":
+            jsonrpc_headers = parse_headers(handler.get("headers", {}))
             tools.append(ToolDefinition(
                 name=tool["name"],
                 description=tool.get("description", ""),
@@ -289,10 +291,11 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
                 handler_type=HandlerType.JSONRPC,
                 url=handler.get("url", ""),
                 method="POST",
-                headers=handler.get("headers", {}),
+                headers=jsonrpc_headers,
                 jsonrpc_method=handler.get("method", "")
             ))
         else:
+            rest_headers = parse_headers(handler.get("headers", {}))
             tools.append(ToolDefinition(
                 name=tool["name"],
                 description=tool.get("description", ""),
@@ -300,10 +303,26 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
                 handler_type=HandlerType.REST,
                 url=handler.get("url", ""),
                 method=handler.get("method", "GET").upper(),
-                headers=handler.get("headers", {}),
+                headers=rest_headers,
                 body=handler.get("body", {})
             ))
     return tools
+
+
+def parse_headers(headers) -> dict:
+    if not headers:
+        return {}
+    if isinstance(headers, list):
+        result = {}
+        for h in headers:
+            if isinstance(h, dict):
+                result[h.get("name", "")] = h.get("value", "")
+            elif isinstance(h, str):
+                parts = h.split(":")
+                if len(parts) >= 2:
+                    result[parts[0].strip()] = ":".join(parts[1:]).strip()
+        return result
+    return headers if isinstance(headers, dict) else {}
 
 
 def create_rest_tool(definition: ToolDefinition):
