@@ -12,6 +12,8 @@
 
 - **YAML-driven** — Define MCP tools in simple YAML files
 - **REST-native** — Built for HTTP APIs (GET, POST, PUT, DELETE)
+- **GraphQL** — Native GraphQL query support
+- **JSONRPC** — JSONRPC method support
 - **Zero code** — No Python needed to add new tools
 - **FastMCP-powered** — Leverages the FastMCP framework
 - **UV-managed** — Fast dependency management
@@ -128,38 +130,13 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ## Configuration Reference
 
+See [CONFIG_SCHEMA.md](CONFIG_SCHEMA.md) for complete documentation.
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `server_name` | string | No | Server name shown in MCP |
 | `version` | string | No | API version |
 | `tools` | array | Yes | List of tool definitions |
-
-### Tool Definition
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Tool name (snake_case) |
-| `description` | string | Yes | Tool description |
-| `input_schema` | object | Yes | JSON Schema for parameters |
-| `handler.url` | string | Yes | REST endpoint URL |
-| `handler.method` | string | No | GET, POST, PUT, DELETE (default: GET) |
-| `handler.headers` | object | No | HTTP headers |
-
-### Input Schema
-
-Standard [JSON Schema](https://json-schema.org/) format:
-
-```yaml
-input_schema:
-  type: object
-  properties:
-    param_name:
-      type: string|number|integer|boolean
-      description: Parameter description
-      enum: [option1, option2]  # for enums
-  required:
-    - param_name
-```
 
 ## Examples
 
