@@ -1,0 +1,35 @@
+server_name: demo-server
+version: "1.0"
+
+tools:
+  - name: get_time
+    description: Returns current server time
+    input_schema:
+      type: object
+      properties: {}
+    handler:
+      url: http://worldtimeapi.org/api/timezone/UTC
+      method: GET
+
+  - name: echo
+    description: Echoes back the input message
+    input_schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message to echo back
+      required:
+        - message
+    handler:
+      url: https://httpbin.org/post
+      method: POST
+
+  - name: get_ip
+    description: Get public IP address
+    input_schema:
+      type: object
+      properties: {}
+    handler:
+      url: https://api.ipify.org?format=json
+      method: GET
