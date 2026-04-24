@@ -1,9 +1,24 @@
 [project]
 name = "any-api-mcp"
-version = "0.1.0"
-description = "Dynamic MCP server with YAML configuration"
+version = "0.2.0"
+description = "Dynamic MCP server with YAML configuration for REST, GraphQL, and JSONRPC APIs"
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "hydraside" }
+]
+keywords = ["mcp", "fastmcp", "yaml", "rest", "graphql", "jsonrpc", "claude"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "fastmcp>=2.0.0",
     "pyyaml>=6.0",
@@ -15,6 +30,14 @@ dev = [
     "pytest>=8.0.0",
     "ruff>=0.4.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/hydraside/any-api-mcp"
+Repository = "https://github.com/hydraside/any-api-mcp.git"
+Issues = "https://github.com/hydraside/any-api-mcp/issues"
+
+[project.scripts]
+any-api-mcp = "any_api_mcp.server:main"
 
 [build-system]
 requires = ["hatchling"]

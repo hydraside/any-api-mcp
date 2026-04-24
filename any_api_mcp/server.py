@@ -21,7 +21,7 @@ def create_server(config_path: str = "config.yaml") -> FastMCP:
     return mcp
 
 
-if __name__ == "__main__":
+def main():
     config_path = os.environ.get("CONFIG_PATH", "config.yaml")
     mcp = create_server(config_path)
     mcp.run()

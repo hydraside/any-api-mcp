@@ -201,6 +201,79 @@ input_schema:
       X-API-Version: "2"
 ```
 
+### With Fixed Body
+
+```yaml
+- name: create_webhook
+  handler:
+    url: https://api.example.com/webhooks
+    method: POST
+    body:
+      type: "notification"
+      enabled: true
+```
+
+### GraphQL
+
+```yaml
+- name: search_characters
+  input_schema:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Character name to search
+  handler:
+    type: graphql
+    url: https://api.example.com/graphql
+    query: |
+      query ($name: String!) {
+        characters(filter: { name: $name }) {
+          results {
+            name
+            status
+          }
+        }
+      }
+```
+
+### JSONRPC
+
+```yaml
+- name: get_user
+  input_schema:
+    type: object
+    properties:
+      user_id:
+        type: integer
+      required: [user_id]
+  handler:
+    type: jsonrpc
+    url: https://api.example.com/rpc
+    method: getUser
+```
+
+## Install
+
+### As CLI Tool
+
+```bash
+# From GitHub
+pip install git+https://github.com/hydraside/any-api-mcp.git
+
+# Run
+any-api-mcp --help
+```
+
+### As Library
+
+```python
+from any_api_mcp import create_server
+
+mcp = create_server("config.yaml")
+mcp.run()
+```
+
 ## Development
 
 ```bash
