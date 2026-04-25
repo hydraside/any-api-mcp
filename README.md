@@ -5,7 +5,6 @@
   <img src="https://img.shields.io/badge/fastmcp-2.0+-green.svg" alt="FastMCP">
   <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License">
   <a href="https://github.com/hydraside/any-api-mcp/actions/workflows/test.yml"><img src="https://github.com/hydraside/any-api-mcp/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <a href="https://github.com/hydraside/any-api-mcp/pkgs/container/any-api-mcp"><img src="https://img.shields.io/badge/docker-ghcr.io-blue.svg" alt="Docker"></a>
 </p>
 
 > Dynamic MCP server that generates tools from YAML configuration. Define REST APIs once, use everywhere.
@@ -294,7 +293,9 @@ pip install git+https://github.com/hydraside/any-api-mcp.git
 any-api-mcp --help
 ```
 
-### Docker
+### Docker (optional)
+
+Build and run locally:
 
 ```bash
 # Build
@@ -302,10 +303,6 @@ docker build -t any-api-mcp .
 
 # Run
 docker run -p 8000:8000 -v ./config.yaml:/app/config.yaml any-api-mcp
-
-# Or with docker-compose
-docker-compose up -d
-```
 
 ### As Library
 
