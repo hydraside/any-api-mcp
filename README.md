@@ -4,6 +4,8 @@
   <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/fastmcp-2.0+-green.svg" alt="FastMCP">
   <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License">
+  <a href="https://github.com/hydraside/any-api-mcp/actions/workflows/test.yml"><img src="https://github.com/hydraside/any-api-mcp/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/hydraside/any-api-mcp/pkgs/container/any-api-mcp"><img src="https://img.shields.io/badge/docker-ghcr.io-blue.svg" alt="Docker"></a>
 </p>
 
 > Dynamic MCP server that generates tools from YAML configuration. Define REST APIs once, use everywhere.
