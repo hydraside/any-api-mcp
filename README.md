@@ -86,6 +86,14 @@ any-api-mcp --config my-api.yaml
 
 # SSE mode (for web/mobile)
 any-api-mcp config.yaml --transport sse --port 8000
+
+# Logging
+any-api-mcp config.yaml --log-level DEBUG
+any-api-mcp config.yaml --log-level INFO
+any-api-mcp config.yaml --log-file /var/log/any-api-mcp.log
+
+# Show help
+any-api-mcp --help
 ```
 
 ## Quick Start
@@ -282,6 +290,19 @@ pip install git+https://github.com/hydraside/any-api-mcp.git
 
 # Run
 any-api-mcp --help
+```
+
+### Docker
+
+```bash
+# Build
+docker build -t any-api-mcp .
+
+# Run
+docker run -p 8000:8000 -v ./config.yaml:/app/config.yaml any-api-mcp
+
+# Or with docker-compose
+docker-compose up -d
 ```
 
 ### As Library

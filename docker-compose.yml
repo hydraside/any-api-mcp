@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  any-api-mcp:
+    build: .
+    container_name: any-api-mcp
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+
+  # Example with custom config
+  # any-api-mcp-prod:
+  #   build: .
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - ./prod-config.yaml:/app/config.yaml:ro
+  #   environment:
+  #     - CONFIG_PATH=/app/config.yaml
+  #     - LOG_LEVEL=WARNING
+  #   restart: unless-stopped

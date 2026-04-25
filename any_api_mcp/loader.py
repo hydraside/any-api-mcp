@@ -2,9 +2,13 @@ import yaml
 import httpx
 import re
 import json
+import logging
 from typing import Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
+
+
+logger = logging.getLogger("any_api_mcp")
 
 
 class HandlerType(Enum):
@@ -99,8 +103,11 @@ def load_config(path: str) -> dict:
     import os
     
     if os.path.isabs(path):
+        logger.debug(f"Loading config from absolute path: {path}")
         with open(path, "r") as f:
-            return yaml.safe_load(f)
+            config = yaml.safe_load(f)
+        logger.info(f"Loaded config from {path}")
+        return config
     
     search_paths = [
         path,
@@ -110,8 +117,11 @@ def load_config(path: str) -> dict:
     
     for search_path in search_paths:
         if os.path.exists(search_path):
+            logger.debug(f"Found config at: {search_path}")
             with open(search_path, "r") as f:
-                return yaml.safe_load(f)
+                config = yaml.safe_load(f)
+            logger.info(f"Loaded config from {search_path}")
+            return config
     
     with open(path, "r") as f:
         return yaml.safe_load(f)
@@ -252,18 +262,21 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
     if swagger:
         spec_url = swagger.get("url", "")
         if spec_url:
+            logger.info(f"Loading tools from Swagger: {spec_url}")
             auth = AuthConfig.from_dict(swagger.get("auth", {}))
             try:
                 spec = load_swagger(spec_url, auth.get_headers(swagger.get("token")))
                 base_url = swagger.get("base_url", "")
                 swagger_tools = parse_swagger_operations(spec, base_url, auth)
                 if swagger_tools:
+                    logger.info(f"Generated {len(swagger_tools)} tools from Swagger")
                     return swagger_tools
             except Exception as e:
-                print(f"Warning: Could not load Swagger: {e}")
+                logger.warning(f"Could not load Swagger: {e}")
     
     insomnia = config.get("insomnia")
     if insomnia:
+        logger.info("Loading tools from Insomnia")
         import json
         try:
             if insomnia.get("file"):
@@ -323,6 +336,7 @@ def parse_tools(config: dict) -> list[ToolDefinition]:
                 headers=rest_headers,
                 body=handler.get("body", {})
             ))
+    logger.info(f"Loaded {len(tools)} tools from config")
     return tools
 
 
@@ -356,6 +370,8 @@ def create_rest_tool(definition: ToolDefinition):
             url = f"{url}{separator}{query_params}"
             body = None
         
+        logger.debug(f"{method} {url}")
+        
         async with httpx.AsyncClient() as client:
             response = await client.request(
                 method=method,
@@ -363,6 +379,7 @@ def create_rest_tool(definition: ToolDefinition):
                 headers=definition.headers,
                 json=body
             )
+            logger.debug(f"Response: {response.status_code}")
             try:
                 return response.json()
             except Exception:
