@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Swagger/OpenAPI** — Generate tools from OpenAPI specs
-- **Auth support** — api_key, bearer, basic, oauth2
-- **Insomnia import** — Import from Insomnia Collections
+- **CLI** — New `any-api-mcp` command with argparse
+- **Absolute path support** — Config file can be absolute path
+- **--config flag** — `-c` / `--config` option
+- **SSE transport** — `--transport sse --port` for web clients
+
+### Fixed
+
+- **kwargs passing** — Tools now properly receive parameters
 
 ## [0.2.0] - 2026-04-24
 

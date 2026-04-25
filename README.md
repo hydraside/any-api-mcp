@@ -18,6 +18,12 @@
 - **FastMCP-powered** — Leverages the FastMCP framework
 - **UV-managed** — Fast dependency management
 
+## Supported Clients
+
+- Claude Desktop
+- OpenCode
+- Any MCP-compatible client
+
 ## Why?
 
 Typically you'd create MCP tools like this:
@@ -59,8 +65,27 @@ That's it. No code changes needed.
 git clone https://github.com/hydraside/any-api-mcp.git
 cd any-api-mcp
 
-# Install dependencies
+# Install with UV
 uv sync
+
+# Or install as package
+pip install git+https://github.com/hydraside/any-api-mcp.git
+```
+
+## CLI Usage
+
+```bash
+# Run with default config.yaml
+any-api-mcp
+
+# Specify config file
+any-api-mcp my-api.yaml
+
+# Or with flag
+any-api-mcp --config my-api.yaml
+
+# SSE mode (for web/mobile)
+any-api-mcp config.yaml --transport sse --port 8000
 ```
 
 ## Quick Start
@@ -107,22 +132,39 @@ tools:
 ### 2. Run the server
 
 ```bash
-CONFIG_PATH=my-api.yaml uv run python -m any_api_mcp.server
+# CLI
+any-api-mcp my-api.yaml
+
+# Or with uv
+uv run any-api-mcp my-api.yaml
+
+# SSE mode for web
+any-api-mcp my-api.yaml --transport sse --port 8000
 ```
 
-### 3. Connect to Claude Desktop
+### 3. Connect to Claude Desktop / OpenCode
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Add to your Claude Desktop config (`~/.config/claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
-    "my-weather-api": {
-      "command": "uv",
-      "args": ["run", "python", "-m", "any_api_mcp.server"],
-      "env": {
-        "CONFIG_PATH": "my-api.yaml"
-      }
+    "any-api": {
+      "command": "any-api-mcp",
+      "args": ["--config", "/path/to/my-api.yaml"]
+    }
+  }
+}
+```
+
+Or for SSE mode:
+
+```json
+{
+  "mcpServers": {
+    "any-api": {
+      "command": "any-api-mcp",
+      "args": ["--config", "/path/to/my-api.yaml", "--transport", "sse", "--port", "8000"]
     }
   }
 }
