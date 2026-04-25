@@ -96,6 +96,23 @@ class ToolDefinition:
 
 
 def load_config(path: str) -> dict:
+    import os
+    
+    if os.path.isabs(path):
+        with open(path, "r") as f:
+            return yaml.safe_load(f)
+    
+    search_paths = [
+        path,
+        os.path.join(os.getcwd(), path),
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), path),
+    ]
+    
+    for search_path in search_paths:
+        if os.path.exists(search_path):
+            with open(search_path, "r") as f:
+                return yaml.safe_load(f)
+    
     with open(path, "r") as f:
         return yaml.safe_load(f)
 
