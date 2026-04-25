@@ -14,6 +14,11 @@ def main():
         help="Path to YAML config file"
     )
     parser.add_argument(
+        "-c", "--config",
+        dest="config_path",
+        help="Path to YAML config file (overrides positional argument)"
+    )
+    parser.add_argument(
         "--transport",
         "-t",
         default="stdio",
@@ -30,8 +35,10 @@ def main():
     
     args = parser.parse_args()
     
+    config_path = args.config_path or args.config
+    
     from any_api_mcp.server import create_server
-    mcp = create_server(args.config)
+    mcp = create_server(config_path)
     
     if args.transport == "sse":
         mcp.run(transport="sse", port=args.port)
