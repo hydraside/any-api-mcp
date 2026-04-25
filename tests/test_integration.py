@@ -131,7 +131,7 @@ class TestCreateRestTool:
             call_args = mock_client.return_value.__aenter__.return_value.request.call_args
             assert call_args.kwargs["method"] == "POST"
             assert call_args.kwargs["json"]["name"] == "John"
-            assert call_args.kwargs["json"]["active"] == True
+            assert call_args.kwargs["json"]["active"]
 
     @pytest.mark.asyncio
     async def test_request_uses_headers(self, rest_tool_def):

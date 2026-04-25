@@ -3,7 +3,7 @@ import httpx
 import re
 import json
 import logging
-from typing import Any, Optional
+from typing import Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -231,7 +231,7 @@ def parse_insomnia_requests(data: dict, base_headers: dict = None) -> list[ToolD
                     if body.get("text"):
                         try:
                             body_data = json.loads(body["text"])
-                        except:
+                        except Exception:
                             body_data = {"raw": body["text"]}
                     
                     tool_name = re.sub(r"[^a-z0-9_]", "_", name.lower())
