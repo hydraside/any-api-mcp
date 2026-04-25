@@ -24,6 +24,9 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -v
       
+      - name: Install dev dependencies
+        run: uv sync --all-extras
+      
       - name: Run linter
         run: uv run python -m ruff check .
 
