@@ -37,7 +37,7 @@ Repository = "https://github.com/hydraside/any-api-mcp.git"
 Issues = "https://github.com/hydraside/any-api-mcp/issues"
 
 [project.scripts]
-any-api-mcp = "any_api_mcp.server:main"
+any-api-mcp = "any_api_mcp.cli:main"
 
 [build-system]
 requires = ["hatchling"]
