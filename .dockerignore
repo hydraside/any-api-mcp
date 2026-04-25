@@ -14,6 +14,7 @@ build/
 .gitignore
 .vscode/
 *.md
+!README.md
 tests/
 .DS_Store
 *.log
