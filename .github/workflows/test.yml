@@ -25,7 +25,7 @@ jobs:
         run: uv run pytest tests/ -v
       
       - name: Run linter
-        run: uv run ruff check .
+        run: uv run python -m ruff check .
 
   build-docker:
     runs-on: ubuntu-latest
